@@ -39,9 +39,12 @@ li a {
     text-decoration: none;
 }
 
-.tab .animate img:hover {
-    transform: translateY(-20px);
-    height: 81px;
-    transition: transform 1s ease;
+img {
+    transition: translate 1s, height 1s;
     background-color: #333;
+}
+
+.tab .animate img:hover {
+    translate: 0 -20px;
+    height: 81px;
 }

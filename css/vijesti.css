@@ -1,0 +1,110 @@
+* {
+    box-sizing: border-box;
+}
+
+#page-layout > * {
+    border: 1px solid black;
+}
+
+body {
+    margin: 0;
+}
+
+.glavna-vijest {
+    grid-area: glavna-vijest;
+    background-color: cadetblue;
+}
+
+.kvadratna-vijest1 {
+    grid-area: kvadratna-vijest1;
+    background-color: indianred;
+}
+
+.kvadratna-vijest2 {
+    grid-area: kvadratna-vijest2;
+    background-color: indianred;
+}
+
+.kvadratna-vijest3 {
+    grid-area: kvadratna-vijest3;
+    background-color: indianred;
+}
+
+.kvadratna-vijest4 {
+    grid-area: kvadratna-vijest4;
+    background-color: indianred;
+}
+
+.kvadratna-vijest5 {
+    grid-area: kvadratna-vijest5;
+    background-color: indianred;
+}
+
+.kvadratna-vijest6 {
+    grid-area: kvadratna-vijest6;
+    background-color: indianred;
+}
+
+.kvadratna-vijest7 {
+    grid-area: kvadratna-vijest7;
+    background-color: indianred;
+}
+
+.kvadratna-vijest8 {
+    grid-area: kvadratna-vijest8;
+    background-color: indianred;
+}
+
+
+.visoka-vijest1 {
+    grid-area: visoka-vijest1;
+    background-color: khaki;
+}
+
+.visoka-vijest2 {
+    grid-area: visoka-vijest2;
+    background-color: khaki;
+}
+
+.visoka-vijest3 {
+    grid-area: visoka-vijest3;
+    background-color: khaki;
+}
+
+.visoka-vijest4 {
+    grid-area: visoka-vijest4;
+    background-color: khaki;
+}
+
+#page-layout {
+    height: 100vh;
+    height: 100dvh;
+    display: grid;
+    grid-template-rows: repeat(6, 25vw);
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-areas:
+    "glavna-vijest glavna-vijest glavna-vijest glavna-vijest"
+    "glavna-vijest glavna-vijest glavna-vijest glavna-vijest"
+    "visoka-vijest1 kvadratna-vijest1 kvadratna-vijest2 visoka-vijest2"
+    "visoka-vijest1 kvadratna-vijest3 kvadratna-vijest4 visoka-vijest2"
+    "kvadratna-vijest5 kvadratna-vijest6 visoka-vijest3 visoka-vijest4"
+    "kvadratna-vijest7 kvadratna-vijest8 visoka-vijest3 visoka-vijest4";
+}
+
+@media (width < 800px) {
+    #page-layout {
+        grid-template-rows: repeat(10, 50vw);
+        grid-template-columns: repeat(2, 50vw);
+        grid-template-areas:
+        "glavna-vijest glavna-vijest"
+        "glavna-vijest glavna-vijest"
+        "visoka-vijest1 kvadratna-vijest1"
+        "visoka-vijest1 kvadratna-vijest2"
+        "kvadratna-vijest3 visoka-vijest2"
+        "kvadratna-vijest4 visoka-vijest2"
+        "kvadratna-vijest5 kvadratna-vijest6"
+        "kvadratna-vijest7 kvadratna-vijest8"
+        "visoka-vijest3 visoka-vijest4"
+        "visoka-vijest3 visoka-vijest4"
+    }
+}
