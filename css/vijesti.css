@@ -2,17 +2,31 @@
     box-sizing: border-box;
 }
 
-#page-layout > * {
-    border: 1px solid black;
-}
 
 body {
+    background-color: black;
+    border: 1px solid black;
     margin: 0;
 }
 
+#page-layout > * {
+    padding: 0.5rem;
+}
+
 .glavna-vijest {
+    display: grid;
+    place-content: center;
     grid-area: glavna-vijest;
     background-color: cadetblue;
+    background-image: linear-gradient(rgba(0 0 0 / 50%),
+        rgba(0 0 0 / 50%)),
+        url(https://julienflorkin.com/wp-content/uploads/2023/10/industrial-revolutions-4-768x439.webp);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    text-shadow: 0 2px 2px black;
+    color: white;
+    text-align: center;
 }
 
 .kvadratna-vijest1 {
@@ -55,7 +69,6 @@ body {
     background-color: indianred;
 }
 
-
 .visoka-vijest1 {
     grid-area: visoka-vijest1;
     background-color: khaki;
@@ -82,6 +95,7 @@ body {
     display: grid;
     grid-template-rows: repeat(6, 25vw);
     grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
     grid-template-areas:
     "glavna-vijest glavna-vijest glavna-vijest glavna-vijest"
     "glavna-vijest glavna-vijest glavna-vijest glavna-vijest"

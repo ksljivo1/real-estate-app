@@ -1,0 +1,48 @@
+*******************************************************
+***************Komentari za prvi zadatak***************
+*******************************************************
+
+-Pozitivne strane:
+
+1) Hover efekat:
+Dopada mi se što je dodana :hover pseudoklasa koja značajno poboljšava korisničko iskustvo.
+Ovaj detalj čini interakciju s navigacijskim linkovima intuitivnijom i estetski privlačnijom.
+
+2) Kontrast boja:
+Pozadinska boja i boja teksta su odabrane tako da obezbijede dobar kontrast, što omogućava
+odličnu čitljivost sadržaja, čak i za korisnike sa slabijim vidom ili u lošijim uvjetima osvjetljenja.
+
+-Negativne strane i prijedlozi za poboljšanje:
+
+1) Korištenje iframe elementa za navigacijski bar:
+Smatram da korištenje iframe elementa za navigacijski bar nije najbolje rješenje jer može otežati održavanje
+koda i negativno utjecati na SEO performanse stranice. Predložio bih implementaciju standardnog navigacijskog
+bara (<nav> element) za bolje strukturiranje i semantičku vrijednost.
+
+2) Nedostatak medijskih upita za preferencije korisnika:
+Animacija trenutno nije optimizirana za korisnike koji su u svojim sistemskim postavkama omogućili
+opciju "Prefers Reduced Motion".  Dodavanjem odgovarajućih media query pravila
+(@media (prefers-reduced-motion: reduce)) poboljšala bi se pristupačnost stranice za ovu grupu korisnika.
+
+******************************************************
+**************Komentari za drugi zadatak**************
+******************************************************
+
+-Pozitivne strane postojećeg projekta:
+
+1) Organizacija i estetika CSS-a:
+Kôd je pregledan i organizovan, s jasno definisanim klasama poput .nekretnina, .detalji-nekretnine, i
+.grid-lista-nekretnina, što olakšava čitanje i održavanje. Također, pozadine specifične za tipove
+nekretnina vizualno unapređuju stranicu.
+
+-Negativne strane i prijedlozi za poboljšanje:
+
+1) Extra prostor kod flex-wrap:
+Korištenje flex-wrap: wrap; uzrokuje pojavu dodatnog prostora kada elementi prelaze u novi red,
+što otežava precizno centriranje. Predlažem korištenje grid layout-a kako bi se riješio ovaj problem.
+
+******************************************************
+**************Komentari za treći zadatak**************
+******************************************************
+
+Trenutno nemam primjedbi na postojeći kôd.

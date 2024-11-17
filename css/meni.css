@@ -48,3 +48,7 @@ img {
     translate: 0 -20px;
     height: 81px;
 }
+
+li a:hover {
+    color: #ff9900;
+}
