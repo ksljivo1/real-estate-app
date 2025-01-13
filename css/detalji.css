@@ -57,8 +57,7 @@ iframe {
   align-self: auto;
 }
 
-
-#upiti {
+#upiti, #glavni-element {
   display: grid;
   grid-auto-rows: 1fr;
   border: 1px solid #000;
@@ -67,7 +66,7 @@ iframe {
   gap: 10px;
 }
 
-.upit {
+.upit, .trenutni {
   border: 1px solid #000;
   padding: 10px;
   margin-bottom: 10px;
@@ -88,11 +87,17 @@ iframe {
   #upiti {
     grid-template-columns: 1fr 1fr;
   }
+  #glavni-element {
+    display: none;
+  }
 }
 
 @media (600px < width <= 800px) {
   #upiti {
     grid-template-columns: 1fr;
+  }
+  #glavni-element {
+    display: none;
   }
 }
 
@@ -106,6 +111,7 @@ iframe {
     border: 1px solid white;
     cursor: pointer;
     transition: opacity 200ms, scale 200ms;
+    margin-inline: 5px;
   }
 
   .carousel-navigation:hover {
@@ -118,12 +124,21 @@ iframe {
     scale: 1.1;
   }
 
+  #carousel {
+    display: flex;
+    align-items: center;
+  }
+
   #upiti {
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: 1fr;
     place-items: center;
   }
 
-  .upit:not(.upit:nth-child(2)) {
+  #glavni-element {
+    display: initial;
+  }
+
+  #upiti {
     display: none;
   }
 }

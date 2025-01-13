@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <h2>Filter nekretnina</h2>
+
+    <form id="filterForm">
+        <label for="tip_nekretnine">Tip nekretnine:</label>
+        <select id="tip_nekretnine">
+            <option value="Stan">Stan</option>
+            <option value="Kuća">Kuća</option>
+            <option value="Poslovni prostor">Poslovni prostor</option>
+        </select><br><br>
+
+        <label for="min_kvadratura">Min Kvadratura:</label>
+        <input type="range" id="min_kvadratura" min="0" max="100" step="1" value="0">
+        <span id="min_kvadratura_value">0 m<sup>2</sup></span><br><br>
+
+        <label for="max_kvadratura">Max Kvadratura:</label>
+        <input type="range" id="max_kvadratura" min="0" max="100" step="1" value="0">
+        <span id="max_kvadratura_value">0 m<sup>2</sup></span><br><br>
+
+        <label for="min_cijena">Min Cijena:</label>
+        <input type="range" id="min_cijena" min="0" max="500000" step="1000" value="0">
+        <span id="min_cijena_value">0 KM</span><br><br>
+
+        <label for="max_cijena">Max Cijena:</label>
+        <input type="range" id="max_cijena" min="0" max="500000" step="1000" value="0">
+        <span id="max_cijena_value">0 KM</span><br><br>
+
+        <button onclick="filterNekretnine()">Primijeni filter</button>
+    </form>
+
+    <div id="spisakNekretnina" style="display: flex; gap: 20px; flex-wrap: wrap; margin-block: 20px"></div>
+
+    <h2>Statistika Nekretnina</h2>
+
+    <div class="statistika">
+        <h2>Prosječna Kvadratura</h2>
+        <p id="prosjecna-kvadratura">Loading...</p>
+    </div>
+
+    <div class="statistika">
+        <h2>Najveći outlier po cijenama</h2>
+        <p id="outlier-po-cijenama">Loading...</p>
+
+        <h2>Najveći outlier po kvadraturi</h2>
+        <p id="outlier-po-kvadraturi">Loading...</p>
+    </div>
+
+    <h2>Histogram</h2>
+    <form>
+        <button id="dodaj-vremenski-period" onclick="dodajVremenskiPeriod()">Dodaj vremenski period</button>
+        <div id="vremenski-periodi" style="padding-bottom: 30px; border-bottom: 1px solid black; display: flex; flex-wrap: wrap; gap: 10px; margin-block: 30px;"></div>
+        <button id="dodaj-raspon-cijena" onclick="dodajRasponCijena()">Dodaj raspon cijena</button>
+        <div id="rasponi-cijena" style="display: flex; flex-wrap: wrap; gap: 10px; margin-block: 30px;"></div>
+        <button onclick="iscrtajHistogram()">Iscrtaj histograme</button>
+        <div id="charts"></div>
+    </form>
+    <script src="../scripts/SpisakNekretnina.js"></script>
+    <script src="../scripts/StatistikaNekretnina.js"></script>
+    <script src="../scripts/nekretnine.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../scripts/statistika.js"></script>
+</body>
+</html>
+<style>
+    body {
+        font-family: 'Arial', sans-serif;
+        margin: 40px;
+        background-color: #f4f4f9;
+        color: #333;
+        line-height: 1.6;
+    }
+
+    h2 {
+        color: #3f5efb;
+        margin-bottom: 15px;
+        text-align: center;
+    }
+
+    form {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+
+    label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    select,
+    input[type="range"],
+    input[type="number"],
+    input[type="date"] {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 14px;
+    }
+
+    input[type="range"] {
+        background: linear-gradient(90deg, #3f5efb, #9c52b4, #fc466b);
+    }
+
+    button {
+        display: block;
+        background-color: #3f5efb;
+        color: white;
+        font-size: 14px;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+        background-color: #2f4ec9;
+    }
+
+    #spisakNekretnina {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    #charts {
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .statistika {
+        background-color: #fff;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+
+    .statistika h2 {
+        font-size: 18px;
+        color: #9c52b4;
+        margin-bottom: 10px;
+    }
+
+    .statistika p {
+        font-size: 16px;
+        color: #555;
+    }
+
+    #vremenski-periodi,
+    #rasponi-cijena {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    #dr, #dv {
+        display: flex;
+        justify-content: space-between;
+        background-color: #e7e9ee;
+        padding: 10px;
+        border-radius: 5px;
+        width: 100%;
+    }
+
+    #dr:nth-child(odd), #dv:nth-child(odd) {
+        background: #3f5efb;
+        color: white;
+    }
+
+    #dr:nth-child(even), #dv:nth-child(even) {
+        background: #9c52b4;
+        color: white;
+    }
+
+    input[type="number"], input[type="date"] {
+        width: calc(50% - 10px);
+    }
+</style>
