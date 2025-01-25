@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="bs-BA">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalji</title>
+    <link rel="stylesheet" type="text/css" href="../style/detalji.css">
+</head>
+
+<body>
+<iframe id="meni-iframe"></iframe> <!-- Remove the src attribute -->
+
+<div id="osnovno">
+    <img src="../resources/1.jpg" alt="Nekretnina">
+    <p><strong>Naziv:</strong>{{naziv}}</p>
+    <p><strong>Kvadratura:</strong>{{kvadratura}} m<sup>2</sup></p>
+    <p><strong>Cijena:</strong>{{cijena}} KM</p>
+</div>
+
+<h3>DETALJI</h3>
+<div id="detalji">
+    <div id="kolona1">
+        <p><strong>Tip grijanja:</strong> {{tip_grijanja}}</p>
+        <p><strong>Lokacija:</strong> {{lokacija}}</p>
+    </div>
+    <div id="kolona2">
+        <p><strong>Godina izgradnje:</strong> {{godina_izgradnje}}</p>
+        <p><strong>Datum objave oglasa:</strong> {{datum_objave}}</p>
+    </div>
+    <div id="opis">
+        <p><strong>Opis:</strong> {{opis}}</p>
+    </div>
+</div>
+
+
+<h3>UPITI</h3>
+<div id="carousel">
+    <button class="btn-reset carousel-navigation" id="lijevo">
+        <img src="../images/left.svg" alt="" width="70" height="50">
+    </button>
+
+    <div id="upiti">
+        {{upiti}}
+    </div>
+    <button class="btn-reset carousel-navigation" id="desno">
+        <img src="../images/right.svg" alt="" width="70" height="50">
+    </button>
+</div>
+
+<script src="../scripts/detalji.js"></script>
+
+</body>
+
+</html>

@@ -6,6 +6,10 @@ html, body {
     margin: 0;
 }
 
+#divNekretnine > h1 {
+    margin-left: 1rem;
+}
+
 body {
     background-color: #fdf1d3;
     font-family: Arial, sans-serif;

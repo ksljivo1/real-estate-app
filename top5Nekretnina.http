@@ -1,0 +1,33 @@
+### GET request to example server
+GET http://localhost:3000/nekretnine/top5?lokacija=Novo Sarajevo
+
+###
+
+### POST request to example server
+POST http://localhost:3000/upit
+Content-Type: application/json
+
+{
+  "nekretnina_id": 2,
+  "tekst_upita" : "wooohooo cetvrti"
+}
+
+### POST request to example server
+POST http://localhost:3000/login
+Content-Type: application/json
+
+{
+  "username": "username4",
+  "password" : "username3"
+}
+
+### get moje nekretnine
+GET http://localhost:3000/upiti/moji
+
+
+### get nekretnina
+GET http://localhost:3000/nekretnina/1
+
+### get page
+GET http://localhost:3000/next/upiti/nekretnina/7?page=3
+
