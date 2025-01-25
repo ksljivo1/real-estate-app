@@ -1,0 +1,192 @@
+[
+    {
+      "id": 1,
+      "tip_nekretnine": "Stan",
+      "naziv": "Useljiv stan Sarajevo",
+      "kvadratura": 58,
+      "cijena": 232000,
+      "tip_grijanja": "plin",
+      "lokacija": "Novo Sarajevo",
+      "godina_izgradnje": 2019,
+      "datum_objave": "01.10.2023.",
+      "opis": "Sociis natoque penatibus.",
+      "upiti": [
+        {
+          "korisnik_id": 3,
+          "tekst_upita": "1Nullam eu pede mokjwbjrbgkve oewuibf fi2ub vvio2ubllis pretium."
+        },
+        {
+          "korisnik_id": 1,
+          "tekst_upita": "2Nullam eu pede mokjwbjrbgkve oewuibf fi2ub vvio2ubllis pretium."
+        },
+        {
+          "korisnik_id": 2,
+          "tekst_upita": "3Phaselluoirhovkwjve  eubvbw weoivubiwoe weviubws viverra nulla."
+        },
+        {
+          "korisnik_id": 3,
+          "tekst_upita": "4Nullam eu pede moloejrvw fowiuebgoiuhikubhvujhyvjuhvujllis pretium."
+        },
+        {
+          "korisnik_id": 1,
+          "tekst_upita": "5Phasellus oebrv fi2u3b v2ioub vio2ubf voi2ue4b v2oiubviverra nulla."
+        },
+        {
+          "korisnik_id": 1,
+          "tekst_upita": "6Nullam eu owijbve 2oeiugvfb vo3u4bjgv 34ofubpede mollis pretium."
+        },
+        {
+          "korisnik_id": 3,
+          "tekst_upita": "7Phaselioruvb fi3u4bg o34iugb o43ufb o324ugblus viverra nulla."
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "tip_nekretnine": "Stan",
+      "naziv": "Luksuzni penthouse",
+      "kvadratura": 120,
+      "cijena": 450000,
+      "tip_grijanja": "plin",
+      "lokacija": "Novo Sarajevo",
+      "godina_izgradnje": 2021,
+      "datum_objave": "15.11.2023.",
+      "opis": "Penthouse sa prelijepim pogledom na grad.",
+      "upiti": [
+        {
+          "korisnik_id": 3,
+          "tekst_upita": "Sed sollicitudin quam quis nisi."
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "tip_nekretnine": "Poslovni prostor",
+      "naziv": "Prostor za kancelariju",
+      "kvadratura": 45,
+      "cijena": 120000,
+      "tip_grijanja": "struja",
+      "lokacija": "Novo Sarajevo",
+      "godina_izgradnje": 2015,
+      "datum_objave": "23.09.2023.",
+      "opis": "Idealno za kancelarije i male biznise.",
+      "upiti": [
+        {
+          "korisnik_id": 4,
+          "tekst_upita": "Cras vel orci et augue sollicitudin."
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "tip_nekretnine": "Kuća",
+      "naziv": "Porodična kuća",
+      "kvadratura": 180,
+      "cijena": 350000,
+      "tip_grijanja": "centralno",
+      "lokacija": "Novo Sarajevo",
+      "godina_izgradnje": 2000,
+      "datum_objave": "10.12.2023.",
+      "opis": "Prostrana kuća sa dvorištem i garažom.",
+      "upiti": [
+        {
+          "korisnik_id": 5,
+          "tekst_upita": "Donec nec justo vitae lorem."
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "tip_nekretnine": "Stan",
+      "naziv": "Trosoban stan sa terasom",
+      "kvadratura": 85,
+      "cijena": 250000,
+      "tip_grijanja": "plin",
+      "lokacija": "Novo Sarajevo",
+      "godina_izgradnje": 2018,
+      "datum_objave": "05.01.2024.",
+      "opis": "Stan sa prostranom terasom i parkingom.",
+      "upiti": [
+        {
+          "korisnik_id": 6,
+          "tekst_upita": "Curabitur eget velit at."
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "tip_nekretnine": "Poslovni prostor",
+      "naziv": "Moderna kancelarija",
+      "kvadratura": 60,
+      "cijena": 90000,
+      "tip_grijanja": "struja",
+      "lokacija": "Novo Sarajevo",
+      "godina_izgradnje": 2010,
+      "datum_objave": "11.01.2024.",
+      "opis": "Kancelarija u srcu Novog Sarajeva, idealna za start-up.",
+      "upiti": [
+        {
+          "korisnik_id": 7,
+          "tekst_upita": "Fusce ac augue at nunc viverra."
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "tip_nekretnine": "Stan",
+      "naziv": "Renovirani stan",
+      "kvadratura": 70,
+      "cijena": 190000,
+      "tip_grijanja": "plin",
+      "lokacija": "Novo Sarajevo",
+      "godina_izgradnje": 2008,
+      "datum_objave": "20.01.2024.",
+      "opis": "Kompletno renoviran stan u mirnoj ulici.",
+      "upiti": [
+        {
+          "korisnik_id": 8,
+          "tekst_upita": "Etiam sit amet tortor sit amet arcu."
+        }
+      ]
+    },
+  {
+    "id": 8,
+    "tip_nekretnine": "Stan",
+    "naziv": "Useljiv stan Sarajevo",
+    "kvadratura": 58,
+    "cijena": 232000,
+    "tip_grijanja": "plin",
+    "lokacija": "Novo Sarajevo",
+    "godina_izgradnje": 2019,
+    "datum_objave": "01.10.2023.",
+    "opis": "Sociis natoque penatibus.",
+    "upiti": [
+      {
+        "korisnik_id": 1,
+        "tekst_upita": "Nullam eu pede mollis ipretium. kkdcj bkaj vckj kajec kqjh ckvjhqa ejkvh kjevh h vkjqha skjvhaq kjh fkaj hfkcj awkjcvh akj vhckja hskjvha kjsv kja svkjhqa skjvha kjsvh akj sva"
+      },
+      {
+        "korisnik_id": 2,
+        "tekst_upita": "Phasellus viverra nulla. osknfv mollis ipretium. kkdcj bkaj vckj kajec kqjh ckvjhqa ejkvh kjevh h vkjqha skjvhaq kjh fkaj hfkcj awkjcvh akj vhckja hskjvha kjsv kja svkjhqa skjvha kjsvh akj sva"
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "tip_nekretnine": "Poslovni prostor",
+    "naziv": "Mali poslovni prostor",
+    "kvadratura": 20,
+    "cijena": 70000,
+    "tip_grijanja": "struja",
+    "lokacija": "Centar",
+    "godina_izgradnje": 2005,
+    "datum_objave": "20.08.2023.",
+    "opis": "Magnis dis parturient montes.",
+    "upiti": [
+      {
+        "korisnik_id": 2,
+        "tekst_upita": "Integer tincidunt."
+      }
+    ]
+  }
+]
