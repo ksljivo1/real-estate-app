@@ -593,5 +593,5 @@ app.get('/next/upiti/nekretnina/:id', async (req, res) => {
 
 // Start server
 app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`test: Server is running on http://localhost:${PORT}`);
 });
