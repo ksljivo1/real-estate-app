@@ -9,7 +9,7 @@ Content-Type: application/json
 
 {
   "nekretnina_id": 2,
-  "tekst_upita" : "wooohooo cetvrti"
+  "tekst_upita" : "wooohooo tff nekretnina"
 }
 
 ### POST request to example server
@@ -17,9 +17,12 @@ POST http://localhost:3000/login
 Content-Type: application/json
 
 {
-  "username": "username4",
+  "username": "username3",
   "password" : "username3"
 }
+
+### get korisnik
+GET http://localhost:3000/korisnik
 
 ### get moje nekretnine
 GET http://localhost:3000/upiti/moji
@@ -30,4 +33,28 @@ GET http://localhost:3000/nekretnina/1
 
 ### get page
 GET http://localhost:3000/next/upiti/nekretnina/7?page=3
+
+### get interesovanja for nekretnina
+GET http://localhost:3000/nekretnina/1/interesovanja
+
+
+### get detalje
+GET http://localhost:3000/detalji.html?id=2
+
+### azuriraj logovanog korisnika
+PUT http://localhost:3000/korisnik
+Content-Type: application/json
+
+{
+  "ime": "username3"
+}
+
+### get nekretnine
+GET http://localhost:3000/nekretnine
+
+### get top 5 nekretnina
+GET http://localhost:3000/nekretnine/top5?lokacija=Centar
+
+### get nekretnina with max 3 upiti
+GET localhost:3000/nekretnina/3
 

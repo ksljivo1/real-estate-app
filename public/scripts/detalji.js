@@ -6,8 +6,8 @@ let id
 function napraviUpitElement(upit) {
     return `
         <div class="upit">
-            <p><strong>Username ${upit.korisnik_id}:</strong></p>
-            <p>${upit.tekst_upita}</p>
+            <p><strong>Username ${upit.KorisnikId}:</strong></p>
+            <p>${upit.tekst}</p>
         </div>
     `
 }
@@ -49,11 +49,14 @@ window.onload = function () {
     const queryString = window.location.search
     const params = new URLSearchParams(queryString)
     id = params.get('id')
+    console.log(id)
     PoziviAjax.getNextUpiti(id, page, (err, data) => {
         if (err != null && err.status === 404) {
             napunjen = true
+            console.log("huh")
         } else {
             let res = JSON.parse(data)
+            console.log("ovo bi trebalo biti prazno za id = 2", res)
             mojiUpiti = [...mojiUpiti, ...res]
         }
 

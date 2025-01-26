@@ -3,6 +3,8 @@ const session = require("express-session");
 const path = require('path');
 const fs = require('fs').promises; // Using asynchronus API for file read and write
 const bcrypt = require('bcrypt');
+const Sequelize = require('sequelize');
+const {QueryTypes, where} = require("sequelize");
 let blokiraniKorisnici = []
 
 const app = express();
@@ -18,6 +20,272 @@ app.use(express.static(__dirname + '/public'));
 
 // Enable JSON parsing without body-parser
 app.use(express.json());
+
+const sequelize = new Sequelize('wt24', 'root', 'password', {
+    host: 'localhost',
+    dialect: 'mysql',
+    pool: {
+        max: 5,
+        min: 0,
+        acquire: 30000,
+        idle: 10000
+    }
+});
+
+const Korisnik = sequelize.define('Korisnik', {
+    id: {
+        type: Sequelize.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    ime: {
+        type: Sequelize.STRING(255),
+        allowNull: false
+    },
+    prezime: {
+        type: Sequelize.STRING(255),
+        allowNull: false
+    },
+    username: {
+        type: Sequelize.STRING(255),
+        allowNull: false,
+        unique: true
+    },
+    password: {
+        type: Sequelize.STRING(255),
+        allowNull: false
+    },
+    admin: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+    }
+}, {
+    tableName: 'Korisnici', // Explicitly defining the table name
+    timestamps: false // Assuming no createdAt/updatedAt columns
+})
+
+const Nekretnina = sequelize.define('Nekretnina', {
+    id: {
+        type: Sequelize.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    tip_nekretnine: {
+        type: Sequelize.STRING(50),
+        allowNull: false
+    },
+    naziv: {
+        type: Sequelize.STRING(255),
+        allowNull: false
+    },
+    kvadratura: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+    },
+    cijena: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+    },
+    tip_grijanja: {
+        type: Sequelize.STRING(50),
+        allowNull: false
+    },
+    lokacija: {
+        type: Sequelize.STRING(255),
+        allowNull: false
+    },
+    godina_izgradnje: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+    },
+    datum_objave: {
+        type: Sequelize.STRING,
+        allowNull: false
+    },
+    opis: {
+        type: Sequelize.TEXT,
+        allowNull: true
+    }
+}, {
+    tableName: 'Nekretnine', // Explicit table name
+    timestamps: false // No createdAt/updatedAt columns
+});
+
+
+const Upit = sequelize.define('Upit', {
+    id: {
+        type: Sequelize.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    tekst: {
+        type: Sequelize.TEXT,
+        allowNull: false
+    }
+}, {
+    tableName: 'Upiti', // Explicitly define the table name
+    timestamps: false // Assuming no createdAt/updatedAt columns
+});
+
+const Zahtjev = sequelize.define('Zahtjev', {
+    id: {
+        type: Sequelize.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    tekst: {
+        type: Sequelize.TEXT,
+        allowNull: false
+    },
+    trazeniDatum: {
+        type: Sequelize.STRING,
+        allowNull: false
+    },
+    odobren: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+    }
+}, {
+    tableName: 'Zahtjevi',
+    timestamps: false
+});
+
+const Ponuda = sequelize.define('Ponuda', {
+    id: {
+        type: Sequelize.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    tekst: {
+        type: Sequelize.TEXT,
+        allowNull: false
+    },
+    cijenaPonude: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+    },
+    datumPonude: {
+        type: Sequelize.STRING,
+        allowNull: false
+    },
+    odbijenaPonuda: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+    }
+}, {
+    tableName: 'Ponude',
+    timestamps: false
+});
+
+const Interesovanje = sequelize.define('Interesovanje', {
+    id: {
+        type: Sequelize.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    interesovanje_fk: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+    },
+    tip_interesovanja: {
+        type: Sequelize.STRING(255),
+        allowNull: false,
+        isIn: {
+            args: [
+                ['upit', 'zahtjev', 'ponuda']
+            ],
+            msg: "Treba biti upit, zahtjev ili ponuda"
+        }
+
+    }
+}, {
+    tableName: 'Interesovanja', // Explicitly defining the table name
+    timestamps: false // Assuming no createdAt/updatedAt columns
+})
+
+Nekretnina.hasMany(Upit, { as:'Upiti' })
+Upit.belongsTo(Nekretnina)
+
+Korisnik.hasMany(Upit, { as:'Upiti' })
+Upit.belongsTo(Korisnik)
+
+Nekretnina.hasMany(Zahtjev, { as:'Zahtjevi' })
+Zahtjev.belongsTo(Nekretnina)
+
+Korisnik.hasMany(Zahtjev, { as:'Zahtjevi' })
+Zahtjev.belongsTo(Korisnik)
+
+Nekretnina.hasMany(Ponuda, { as:'Ponude' })
+Ponuda.belongsTo(Nekretnina)
+
+Korisnik.hasMany(Ponuda, { as:'Ponude' })
+Ponuda.belongsTo(Korisnik)
+
+Ponuda.hasMany(Ponuda, { as: 'vezanePonude', foreignKey: 'parentPonuda_id' });
+Ponuda.belongsTo(Ponuda, { as: 'glavnaPonuda', foreignKey: 'parentPonuda_id' });
+
+async function seedDatabase() {
+    await sequelize.sync({ force: true });
+
+    const adminPass = await bcrypt.hash("admin", 10);
+    const userPass = await bcrypt.hash("user", 10);
+    // Insert users
+    const users = await Korisnik.bulkCreate([
+        { ime: "admin", prezime: "admin", username: "admin", password: adminPass, admin: true },
+        { ime: "user", prezime: "user", username: "user", password: userPass },
+        { ime: "Neko3", prezime: "Nekic3", username: "username3", password: "$2b$10$J6FJzniIpRva.W/V5Cd1g.lDLKSQ0MtE.cF.w7AEde5RuDp5AktLO", admin: false }
+    ]);
+
+    // Insert properties
+    const properties = await Nekretnina.bulkCreate([
+        { tip_nekretnine: "Stan", naziv: "Stan Sarajevo", kvadratura: 58, cijena: 232000, tip_grijanja: "plin", lokacija: "Novo Sarajevo", godina_izgradnje: 2019, datum_objave: "01.10.2023.", opis: "Opis stana." },
+        {
+            tip_nekretnine: "Stan",
+            naziv: "Luksuzni penthouse",
+            kvadratura: 120,
+            cijena: 450000,
+            tip_grijanja: "plin",
+            lokacija: "Novo Sarajevo",
+            godina_izgradnje: 2021,
+            datum_objave: "15.11.2023.",
+            opis: "Penthouse sa prelijepim pogledom na grad."}
+    ]);
+
+    // Insert inquiries (Upiti)
+    const inquiries = await Upit.bulkCreate([
+        { tekst: "Da li je cena fiksna?", KorisnikId: 1, NekretninaId: 1 },
+        { tekst: "Koliko su troškovi režija?", KorisnikId: 2, NekretninaId: 1 },
+        { tekst: "Sta je ovo?", KorisnikId: 3, NekretninaId: 1 }
+    ]);
+
+    // Insert requests (Zahtjevi)
+    const requests = await Zahtjev.bulkCreate([
+        { tekst: "Želim zakazati obilazak.", trazeniDatum: "2024-02-01", odobren: false, KorisnikId: 3, NekretninaId: 1 }
+    ]);
+
+    // Insert offers (Ponude)
+    const offers = await Ponuda.bulkCreate([
+        { tekst: "Nudim 220000 EUR za stan.", cijenaPonude: 220000, datumPonude: "2024-02-05", odbijenaPonuda: false, KorisnikId: 1, NekretninaId: 1 }
+    ]);
+
+    // Insert into Interesovanja
+    await Interesovanje.bulkCreate([
+        { interesovanje_fk: inquiries[0].id, tip_interesovanja: "upit" },
+        { interesovanje_fk: inquiries[1].id, tip_interesovanja: "upit" },
+        { interesovanje_fk: requests[0].id, tip_interesovanja: "zahtjev" },
+        { interesovanje_fk: offers[0].id, tip_interesovanja: "ponuda" },
+        { interesovanje_fk: inquiries[2].id, tip_interesovanja: "upit" }
+    ]);
+
+    console.log("Database seeded successfully!");
+}
+
+seedDatabase().catch(console.error);
+
+
 
 /* ---------------- SERVING HTML -------------------- */
 
@@ -37,8 +305,8 @@ async function serveHTMLFile(req, res, fileName) {
 function renderUpiti(upiti) {
     return upiti.map(upit => `
         <div class="upit">
-            <p><strong>Username ${upit.korisnik_id}:</strong></p>
-            <p>${upit.tekst_upita}</p>
+            <p><strong>Username ${upit.KorisnikId}:</strong></p>
+            <p>${upit.tekst}</p>
         </div>
     `).join('');
 }
@@ -84,12 +352,121 @@ async function saveJsonFile(filename, data) {
     }
 }
 
+// GET /nekretnina/:id/interesovanja
+// vraća listu svih interesovanja vezanih za nekretninu.
+//     Ako je loginovani korisnik admin, onda vratite sve kolone,
+//     a ako korisnik ili nije loginovan ili je obični korisnik, iz ponuda ne vraćajte atribut cijene
+// (osim za korisnika koji je napravio tu ponudu ili ako je ponuda vezana za njegovu raniju ponudu).
+
+app.get('/nekretnina/:id/interesovanja', async (req, res) => {
+    try {
+        const id = req.params.id;
+
+        const upiti = await sequelize.query(
+            `SELECT i.*, u.*
+             FROM Interesovanja i
+             JOIN Upiti u ON i.interesovanje_fk = u.id AND u.NekretninaId = :id
+             WHERE i.tip_interesovanja = 'upit'`,
+            {
+                replacements: { id },
+                type: QueryTypes.SELECT
+            }
+        );
+
+        const zahtjevi = await sequelize.query(
+            `SELECT i.*, z.*
+             FROM Interesovanja i
+             JOIN Zahtjevi z ON i.interesovanje_fk = z.id and z.NekretninaId = :id
+             WHERE i.tip_interesovanja = 'zahtjev'`,
+            {
+                replacements: { id },
+                type: QueryTypes.SELECT
+            }
+        );
+
+        const ponude = await sequelize.query(
+            `SELECT i.*, p.*
+             FROM Interesovanja i
+             JOIN Ponude p ON i.interesovanje_fk = p.id and p.NekretninaId = :id
+             WHERE i.tip_interesovanja = 'ponuda'`,
+            {
+                replacements: { id },
+                type: QueryTypes.SELECT
+            }
+        );
+
+        let results = [...upiti, ...zahtjevi, ...ponude]
+
+        const username = req.session.username
+        if(!username) {
+            results = results.map((interesovanje) => {
+                if (interesovanje.cijenaPonude) {
+                    let interesovanjeMapirano = {}
+                    interesovanjeMapirano.tekst = interesovanje.tekst
+                    interesovanjeMapirano.datumPonude = interesovanje.datumPonude
+                    interesovanjeMapirano.odbijenaPonuda = interesovanje.odbijenaPonuda
+                    interesovanjeMapirano.KorisnikId = interesovanje.KorisnikId
+                    interesovanjeMapirano.NekretninaId = interesovanje.NekretninaId
+                    return interesovanjeMapirano
+                }
+                return interesovanje
+            })
+            return res.status(200).json(results);
+        }
+        const loggedUser = await Korisnik.findOne({ where: { username: username } })
+
+        if (loggedUser.admin) {
+            return res.status(200).json(results);
+        } else {
+            results = results.map((interesovanje) => {
+                if (interesovanje.cijenaPonude && interesovanje.KorisnikId === loggedUser.id) {
+                    let interesovanjeMapirano = {}
+                    interesovanjeMapirano.tekst = interesovanje.tekst
+                    interesovanjeMapirano.datumPonude = interesovanje.datumPonude
+                    interesovanjeMapirano.odbijenaPonuda = interesovanje.odbijenaPonuda
+                    interesovanjeMapirano.KorisnikId = interesovanje.KorisnikId
+                    interesovanjeMapirano.NekretninaId = interesovanje.NekretninaId
+                    return interesovanjeMapirano
+                }
+                return interesovanje
+            })
+            return res.status(200).json(results);
+        }
+
+        // If no results are found, return a 404
+        if (!results || results.length === 0) {
+            return res.status(404).json({ message: "No interesovanja found for this nekretnina." });
+        }
+    } catch (error) {
+        console.error("Error fetching interesovanja:", error);
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+});
+
+
+
 app.get('/detalji.html', async (req, res) => {
     try {
         const id = req.query.id;
 
-        const nekretnine = await readJsonFile('nekretnine')
-        const nekretnina = nekretnine.find(n => n.id == id);
+        const nekretninaDataValue = await Nekretnina.findOne({ where: { id: id } })
+        const nekretnina = nekretninaDataValue.dataValues
+        // const upitiDataValue = await nekretninaDataValue.getUpiti()
+        // console.log(upitiDataValue)
+        // const upiti = upitiDataValue.map(upit => upit.dataValues)
+        // console.log(upiti)
+
+        let upiti = await sequelize.query(
+            `SELECT * FROM Upiti WHERE NekretninaId = :id`,
+            {
+                replacements: { id: id },
+                type: sequelize.QueryTypes.SELECT
+            }
+        );
+
+
+
+        console.log(upiti)
 
         if (!nekretnina) {
             return res.status(404).send('Nekretnina not found');
@@ -137,7 +514,7 @@ app.get('/detalji.html', async (req, res) => {
                     </button>
                     <div id="glavni-element"></div>
                     <div id="upiti">
-                        ${renderUpiti(nekretnina.upiti)}
+                        ${renderUpiti(upiti)}
                     </div>
                     <button class="btn-reset carousel-navigation" id="desno">
                         <img src="../images/right.svg" alt="" width="70" height="50">
@@ -169,8 +546,10 @@ app.post('/login', async (req, res) => {
 
     let prijava = "[" + datum.toDateString() + " - " + datum.toTimeString() +  "]" + " - username: "
     try {
-        const data = await fs.readFile(path.join(__dirname, 'data', 'korisnici.json'), 'utf-8');
-        const korisnici = JSON.parse(data);
+        // const data = await fs.readFile(path.join(__dirname, 'data', 'korisnici.json'), 'utf-8');
+
+        const data = await Korisnik.findAll()
+        const korisnici = data.map(x => x.dataValues)
         let found = false;
 
         if(req.session.blokiraniKorisnici.includes(jsonObj.username)) return
@@ -267,7 +646,8 @@ app.get('/korisnik', async (req, res) => {
 
     try {
         // Read user data from the JSON file
-        const users = await readJsonFile('korisnici');
+        const data = await Korisnik.findAll()
+        const users = data.map(x => x.dataValues)
 
         // Find the user by username
         const user = users.find((u) => u.username === username);
@@ -307,27 +687,36 @@ app.post('/upit', async (req, res) => {
 
     try {
         // Read user data from the JSON file
-        const users = await readJsonFile('korisnici');
+        const data = await Korisnik.findAll()
+        const users = data.map(x => x.dataValues)
+        const  loggedInUser = users.find((user) => user.username === req.session.username);
 
-        // Read properties data from the JSON file
-        const nekretnine = await readJsonFile('nekretnine');
+        const nekretnina = await Nekretnina.findByPk(nekretnina_id)
 
-        // Find the user by username
-        const loggedInUser = users.find((user) => user.username === req.session.username);
-
-        // Check if the property with nekretnina_id exists
-        const nekretnina = nekretnine.find((property) => property.id === nekretnina_id);
+        const [upiti] = await sequelize.query(
+            `SELECT * FROM Upiti WHERE NekretninaId = :id`,
+            { replacements: { id: nekretnina_id } }
+        )
 
         if (!nekretnina) {
             return res.status(400).json({ greska: `Nekretnina sa id-em ${nekretnina_id} ne postoji` });
-        } else if (nekretnina.upiti.filter((upit) => upit.korisnik_id === loggedInUser.id).length === 3) {
+        } else if (upiti.filter((upit) => upit.KorisnikId === loggedInUser.id).length >= 3) {
             return res.status(429).json( { greska: "Previse upita za istu nekretninu." })
         } else {
-            nekretnina.upiti.push({
-                korisnik_id: loggedInUser.id,
-                tekst_upita: tekst_upita
-            })
-            await saveJsonFile('nekretnine', nekretnine);
+
+            const newUpit = await Upit.create({
+                KorisnikId: loggedInUser.id,
+                tekst: tekst_upita,
+                NekretninaId: nekretnina_id
+            });
+
+            const newUpitId = newUpit.id;
+
+            await Interesovanje.create({
+                interesovanje_fk: newUpitId,
+                tip_interesovanja: 'upit',
+            });
+
             res.status(200).json({ poruka: 'Upit je uspješno dodan' });
         }
     } catch (error) {
@@ -350,29 +739,23 @@ app.put('/korisnik', async (req, res) => {
     const { ime, prezime, username, password } = req.body;
 
     try {
-        // Read user data from the JSON file
-        const users = await readJsonFile('korisnici');
+        const user = await Korisnik.findOne({ where: { username: req.session.username } });
 
-        // Find the user by username
-        const loggedInUser = users.find((user) => user.username === req.session.username);
-
-        if (!loggedInUser) {
+        if (!user) {
             // User not found (should not happen if users are correctly managed)
             return res.status(401).json({ greska: 'Neautorizovan pristup' });
         }
 
         // Update user data with the provided values
-        if (ime) loggedInUser.ime = ime;
-        if (prezime) loggedInUser.prezime = prezime;
-        if (username) loggedInUser.username = username;
+        if (ime) user.ime = ime;
+        if (prezime) user.prezime = prezime;
+        if (username) user.username = username;
         if (password) {
-            // Hash the new password
             const hashedPassword = await bcrypt.hash(password, 10);
-            loggedInUser.password = hashedPassword;
+            user.password = hashedPassword;
         }
 
-        // Save the updated user data back to the JSON file
-        await saveJsonFile('korisnici', users);
+        await user.save()
         res.status(200).json({ poruka: 'Podaci su uspješno ažurirani' });
     } catch (error) {
         console.error('Error updating user data:', error);
@@ -385,7 +768,7 @@ Returns all properties from the file.
 */
 app.get('/nekretnine', async (req, res) => {
     try {
-        const nekretnineData = await readJsonFile('nekretnine');
+        const nekretnineData = await Nekretnina.findAll();
         res.json(nekretnineData);
     } catch (error) {
         console.error('Error fetching properties data:', error);
@@ -509,7 +892,8 @@ function parseDate(dateString) {
 app.get('/nekretnine/top5', async (req, res) => {
     try {
         const { lokacija } = req.query
-        let nekretnine = await readJsonFile('nekretnine')
+        let nekretnineDataValues = await Nekretnina.findAll()
+        let nekretnine = nekretnineDataValues.map(x => x.dataValues)
 
         nekretnine.sort((a, b) => {
             const dateA = parseDate(a.datum_objave)
@@ -529,31 +913,22 @@ app.get('/upiti/moji', async (req, res) => {
         if(!req.session.username) {
             return res.status(401).json({ greska: "Neautorizovan pristup" })
         }
-        const users = await readJsonFile('korisnici')
-        let loggedInUser = users.find((user) => user.username === req.session.username)
-        const { id } = loggedInUser
+        let [user] = await sequelize.query(
+            `SELECT * FROM Korisnici WHERE username = :username`,
+            { replacements: { username: req.session.username } }
+        )
+        let [upiti] = await sequelize.query(
+            `SELECT * FROM Upiti WHERE KorisnikId = :id`,
+            { replacements: { id: user[0].id } }
+        )
 
-        let nekretnine = await readJsonFile('nekretnine')
-        let mojeNekretnineSaPraznimUpitima =
-            nekretnine.map((nekretnina) => {
-                return {
-                    id_nekretnine: nekretnina.id,
-                    moji: nekretnina.upiti.filter((upit) => upit.korisnik_id === id)
-                }
-            })
-
-        let mojiUpiti = []
-        let statusniKod = 200
-        for (const nekretnina of mojeNekretnineSaPraznimUpitima) {
-            for (const upit of nekretnina.moji) {
-                mojiUpiti.push({
-                    id_nekretnine: nekretnina.id_nekretnine,
-                    tekst_upita: upit.tekst_upita
-                })
+        upiti = upiti.map((upit) => {
+            return {
+                tekst_upita: upit.tekst,
+                id_nekretnine: upit.NekretninaId
             }
-        }
-        if (mojiUpiti.length === 0) statusniKod = 404
-        res.status(statusniKod).json(mojiUpiti)
+        })
+        res.json(upiti)
     } catch (error) {
         console.error("Error fetching upiti:", error)
         res.status(500).json({ error: "Internal Server Error" })
@@ -564,10 +939,13 @@ app.get('/upiti/moji', async (req, res) => {
 app.get('/nekretnina/:id', async (req, res) => {
     try {
         const { id } = req.params
-        let nekretnine = await readJsonFile('nekretnine')
-        let nekretnina = nekretnine.find((nekretnina) => nekretnina.id == id)
-        nekretnina.upiti.splice(0, Math.max(0, nekretnina.upiti.length - 3))
-        res.json(nekretnina)
+        let nekretnina = await Nekretnina.findOne({ where: { id: id } })
+        if (!nekretnina) return res.status(404).json([])
+        let upiti = await Upit.findAll({ where: { NekretninaId: id } })
+        let zadnjaTri = upiti.slice(-3)
+        let responseNekretnina = nekretnina.dataValues
+        responseNekretnina.upiti = zadnjaTri
+        res.json(responseNekretnina)
     } catch (error) {
         console.error("Error fetching nekretnina:", error)
         res.status(500).json({ error: "Internal Server Error" })
@@ -578,13 +956,34 @@ app.get('/next/upiti/nekretnina/:id', async (req, res) => {
     try {
         const { id } = req.params
         const { page } = req.query
-        let nekretnine = await readJsonFile('nekretnine')
-        let nekretnina = nekretnine.find((nekretnina) => nekretnina.id == id)
-        const offset = nekretnina.upiti.length - 3 * (parseInt(page) + 1)
+        // let nekretnine = await readJsonFile('nekretnine')
+        // let nekretnina = nekretnine.find((nekretnina) => nekretnina.id == id)
+        // const offset = nekretnina.upiti.length - 3 * (parseInt(page) + 1)
+        // if (offset + 3 <= 0) return res.status(404).json([])
+        // nekretnina.upiti = nekretnina.upiti.slice(Math.max(offset, 0), offset + 3)
+        // let statusniKod = nekretnina.upiti.length === 0 ? 404 : 200
+
+
+        // let nekretninaDataValue = await Nekretnina.findOne({ id: id })
+        // const upitiDataValue = await nekretninaDataValue.getUpiti()
+        // console.log(upitiDataValue)
+        // const upiti = upitiDataValue.map((upit) => upit.dataValues)
+
+        let upiti = await sequelize.query(
+            `SELECT * FROM Upiti WHERE NekretninaId = :id`,
+            {
+                replacements: { id: id },
+                type: sequelize.QueryTypes.SELECT
+            }
+        );
+
+        // upiti = upiti.map((upit) => upit.dataValues)
+
+        const offset = upiti.length - 3 * (parseInt(page) + 1)
         if (offset + 3 <= 0) return res.status(404).json([])
-        nekretnina.upiti = nekretnina.upiti.slice(Math.max(offset, 0), offset + 3)
-        let statusniKod = nekretnina.upiti.length === 0 ? 404 : 200
-        res.status(statusniKod).json(nekretnina.upiti)
+        let upitiResponse = upiti.slice(Math.max(offset, 0), offset + 3)
+        let statusniKod = upitiResponse.length === 0 ? 404 : 200
+        res.status(statusniKod).json(upitiResponse)
     } catch (error) {
         console.error("Error fetching nekretnina:", error)
         res.status(500).json({ error: "Internal Server Error" })
