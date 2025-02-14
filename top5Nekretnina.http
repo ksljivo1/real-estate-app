@@ -58,3 +58,13 @@ GET http://localhost:3000/nekretnine/top5?lokacija=Centar
 ### get nekretnina with max 3 upiti
 GET localhost:3000/nekretnina/3
 
+### sign up test
+POST localhost:3000/signUp
+Content-Type: application/json
+
+{
+  "name": "hamdolini",
+  "lastName" : "jj",
+  "username":"ee",
+  "password": "password"
+}

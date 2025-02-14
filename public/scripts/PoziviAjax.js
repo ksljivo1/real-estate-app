@@ -202,6 +202,13 @@ const PoziviAjax = (() => {
         ajaxRequest('GET', `http://localhost:3000/next/upiti/nekretnina/${nekretnina_id}?page=${encodeURIComponent(page)}`, null, fnCallback)
     }
 
+    function signUp(name, lastName, username, password, fnCallback) {
+        const data = {
+            name, lastName, username, password
+        }
+        ajaxRequest('POST', 'http://localhost:3000/signUp', data, fnCallback)
+    }
+
     return {
         postLogin: impl_postLogin,
         postLogout: impl_postLogout,
@@ -212,6 +219,7 @@ const PoziviAjax = (() => {
         getTop5Nekretnina: getTop5Nekretnina,
         getMojiUpiti: getMojiUpiti,
         getNekretnina: getNekretnina,
-        getNextUpiti: getNextUpiti
+        getNextUpiti: getNextUpiti,
+        signUp
     };
 })();
