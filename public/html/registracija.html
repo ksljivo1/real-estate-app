@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="bs-BA">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Prijava</title>
+        <link rel="stylesheet" type="text/css" href="../style/registracija.css">
+    </head>
+
+    <body id="body">
+        <iframe src="meni.html"></iframe>
+        <div id="frame">
+            <form id="form">
+                <label for="name">Name: </label>
+                <input required type="text" id="name" name="name">
+
+                <label for="last-name">Last name :</label>
+                <input required type="text" id="last-name" name="last-name">
+
+                <label for="username">Username: </label>
+                <input required type="text" id="username" name="username">
+
+                <label for="password">Password :</label>
+                <div class="input-and-warning">
+                    <input required type="password" id="password" name="password" minlength="8">
+                    <p id="password-warning">Must be at least 8 characters long</p>
+                </div>
+
+                <label for="confirmed-password">Confirm password:</label>
+                <div class="input-and-warning">
+                    <input required type="password" id="confirmed-password" name="confirmed-password">
+                    <p id="password-mismatch-message">Passwords must match</p>
+                </div>
+            </form>
+            <button id="submit-button" type="button" aria-label="login">Sign up</button>
+        </div>
+        <div id="areaBelow">
+
+        </div>
+    </body>
+    <script src="../scripts/PoziviAjax.js"></script>
+    <script src="../scripts/registracija.js"></script>
+</html>

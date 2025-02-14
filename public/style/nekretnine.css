@@ -12,7 +12,7 @@ html, body {
 
 body {
     background-color: #fdf1d3;
-    font-family: Arial, sans-serif;
+    font-family: system-ui;
     height: 100vh;
     padding: 0;
 }

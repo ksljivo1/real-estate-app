@@ -1,7 +1,7 @@
 const express = require('express');
 const session = require("express-session");
 const path = require('path');
-const fs = require('fs').promises; // Using asynchronus API for file read and write
+const fs = require('fs').promises;
 const bcrypt = require('bcrypt');
 const Sequelize = require('sequelize');
 const {QueryTypes, where} = require("sequelize");
@@ -21,7 +21,7 @@ app.use(express.static(__dirname + '/public'));
 // Enable JSON parsing without body-parser
 app.use(express.json());
 
-const sequelize = new Sequelize('wt24', 'root', 'password', {
+const sequelize = new Sequelize('wt24', 'root', '', {
     host: 'localhost',
     dialect: 'mysql',
     pool: {
@@ -318,7 +318,8 @@ const routes = [
     { route: '/meni.html', file: 'meni.html' },
     { route: '/prijava.html', file: 'prijava.html' },
     { route: '/profil.html', file: 'profil.html' },
-    { route: '/mojiUpiti.html', file: 'mojiUpiti.html' }
+    { route: '/mojiUpiti.html', file: 'mojiUpiti.html' },
+    { route: '/registracija.html', file: 'registracija.html' }
     // Practical for adding more .html files as the project grows
 ];
 
@@ -443,7 +444,29 @@ app.get('/nekretnina/:id/interesovanja', async (req, res) => {
     }
 });
 
-
+app.post('/signUp', async (req, res) => {
+    try {
+        const { name, lastName, username, password } = req.body
+        const hashPass = await bcrypt.hash(password, 12)
+        const duplicate = await Korisnik.findOne({ where: { username: username }})
+        if (duplicate) {
+            console.log("duplikatttt")
+            return res.status(409).json({ "message": "duplicate user" })
+        }
+        await Korisnik.create(
+            {
+                ime: name,
+                prezime: lastName,
+                username: username,
+                password: hashPass
+            }
+        )
+        return res.status(200).json({ message: "User signed up successfully" });
+    } catch (error) {
+        console.error('Error during signing up:', error);
+        res.status(500).json({ greska: 'Internal Server Error' });
+    }
+})
 
 app.get('/detalji.html', async (req, res) => {
     try {
@@ -451,10 +474,6 @@ app.get('/detalji.html', async (req, res) => {
 
         const nekretninaDataValue = await Nekretnina.findOne({ where: { id: id } })
         const nekretnina = nekretninaDataValue.dataValues
-        // const upitiDataValue = await nekretninaDataValue.getUpiti()
-        // console.log(upitiDataValue)
-        // const upiti = upitiDataValue.map(upit => upit.dataValues)
-        // console.log(upiti)
 
         let upiti = await sequelize.query(
             `SELECT * FROM Upiti WHERE NekretninaId = :id`,
@@ -582,7 +601,7 @@ app.post('/login', async (req, res) => {
             }
         }
         let blokiran = (neuspjesnoCount % 3 === 0) && (neuspjesnoCount !== 0)
-        if(blokiran) {
+        if (blokiran) {
             blokiraniKorisnici.push(jsonObj.username)
             req.session.save((err) => {
                 if(err) console.log("Failed to save session:", err)
@@ -598,10 +617,10 @@ app.post('/login', async (req, res) => {
                 }, 60000);
             })
         }
-        if(found) {
+        if (found) {
             res.json({ poruka: 'Uspješna prijava' })
         }
-        else if(blokiran) res.status(429).json({ greska: 'Previse neuspjesnih pokusaja. Pokusajte ponovo za 1 minutu.' })
+        else if (blokiran) res.status(429).json({ greska: 'Previse neuspjesnih pokusaja. Pokusajte ponovo za 1 minutu.' })
         else res.json({ poruka: 'Neuspješna prijava' })
     } catch (error) {
         console.error('Error during login:', error);
