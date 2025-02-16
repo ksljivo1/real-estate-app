@@ -40,31 +40,33 @@ window.onload = () => {
                 }
                 else {
                     document.getElementById("areaBelow").innerHTML = ""
-
-
-                    const notification = document.createElement('div');
-                    notification.innerText = "Signup successful!";
-                    notification.style.position = 'fixed';
-                    notification.style.bottom = '50%';
-                    notification.style.left = '50%';
-                    notification.style.transform = 'translateX(-50%)';
-                    notification.style.backgroundColor = '#4CAF50';
-                    notification.style.color = 'white';
-                    notification.style.padding = '10px 20px';
-                    notification.style.borderRadius = '5px';
-                    notification.style.fontSize = '16px';
-                    notification.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.2)';
-                    document.body.appendChild(notification);
-
-
-                    setTimeout(() => {
-                        notification.style.opacity = '0'
-                        setTimeout(() => {
-                            notification.remove();
-                        }, 500);
-                    }, 5000);
+                    displayNotification()
                 }
             }
         )
     })
+}
+
+function displayNotification() {
+    const notification = document.createElement('div');
+    notification.innerText = "Signup successful!";
+    notification.style.position = 'fixed';
+    notification.style.bottom = '20px';
+    notification.style.left = '50%';
+    notification.style.transform = 'translateX(-50%)';
+    notification.style.backgroundColor = '#333';
+    notification.style.color = 'white';
+    notification.style.padding = '10px 20px';
+    notification.style.borderRadius = '5px';
+    notification.style.fontSize = '16px';
+    notification.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.2)';
+    document.body.appendChild(notification);
+
+
+    setTimeout(() => {
+        notification.style.opacity = '0'
+        setTimeout(() => {
+            notification.remove();
+        }, 500);
+    }, 5000);
 }
