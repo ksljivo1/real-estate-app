@@ -1,14 +1,13 @@
-const express = require('express');
-const session = require("express-session");
-const path = require('path');
-const fs = require('fs').promises;
-const bcrypt = require('bcrypt');
-const Sequelize = require('sequelize');
-const {QueryTypes, where} = require("sequelize");
+const express = require('express')
+const session = require("express-session")
+const path = require('path')
+const fs = require('fs').promises
+const bcrypt = require('bcrypt')
+const { QueryTypes} = require("sequelize")
 let blokiraniKorisnici = []
 
-const app = express();
-const PORT = 3000;
+const app = express()
+const PORT = 3000
 
 app.use(session({
     secret: 'tajna sifra',
@@ -16,195 +15,17 @@ app.use(session({
     saveUninitialized: true
 }));
 
-app.use(express.static(__dirname + '/public'));
+app.use(express.static(__dirname + '/public'))
 
-// Enable JSON parsing without body-parser
 app.use(express.json());
 
-const sequelize = new Sequelize('wt24', 'root', '', {
-    host: 'localhost',
-    dialect: 'mysql',
-    pool: {
-        max: 5,
-        min: 0,
-        acquire: 30000,
-        idle: 10000
-    }
-});
-
-const Korisnik = sequelize.define('Korisnik', {
-    id: {
-        type: Sequelize.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
-    },
-    ime: {
-        type: Sequelize.STRING(255),
-        allowNull: false
-    },
-    prezime: {
-        type: Sequelize.STRING(255),
-        allowNull: false
-    },
-    username: {
-        type: Sequelize.STRING(255),
-        allowNull: false,
-        unique: true
-    },
-    password: {
-        type: Sequelize.STRING(255),
-        allowNull: false
-    },
-    admin: {
-        type: Sequelize.BOOLEAN,
-        allowNull: false,
-        defaultValue: false
-    }
-}, {
-    tableName: 'Korisnici', // Explicitly defining the table name
-    timestamps: false // Assuming no createdAt/updatedAt columns
-})
-
-const Nekretnina = sequelize.define('Nekretnina', {
-    id: {
-        type: Sequelize.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
-    },
-    tip_nekretnine: {
-        type: Sequelize.STRING(50),
-        allowNull: false
-    },
-    naziv: {
-        type: Sequelize.STRING(255),
-        allowNull: false
-    },
-    kvadratura: {
-        type: Sequelize.INTEGER,
-        allowNull: false
-    },
-    cijena: {
-        type: Sequelize.INTEGER,
-        allowNull: false
-    },
-    tip_grijanja: {
-        type: Sequelize.STRING(50),
-        allowNull: false
-    },
-    lokacija: {
-        type: Sequelize.STRING(255),
-        allowNull: false
-    },
-    godina_izgradnje: {
-        type: Sequelize.INTEGER,
-        allowNull: false
-    },
-    datum_objave: {
-        type: Sequelize.STRING,
-        allowNull: false
-    },
-    opis: {
-        type: Sequelize.TEXT,
-        allowNull: true
-    }
-}, {
-    tableName: 'Nekretnine', // Explicit table name
-    timestamps: false // No createdAt/updatedAt columns
-});
-
-
-const Upit = sequelize.define('Upit', {
-    id: {
-        type: Sequelize.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
-    },
-    tekst: {
-        type: Sequelize.TEXT,
-        allowNull: false
-    }
-}, {
-    tableName: 'Upiti', // Explicitly define the table name
-    timestamps: false // Assuming no createdAt/updatedAt columns
-});
-
-const Zahtjev = sequelize.define('Zahtjev', {
-    id: {
-        type: Sequelize.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
-    },
-    tekst: {
-        type: Sequelize.TEXT,
-        allowNull: false
-    },
-    trazeniDatum: {
-        type: Sequelize.STRING,
-        allowNull: false
-    },
-    odobren: {
-        type: Sequelize.BOOLEAN,
-        allowNull: false,
-        defaultValue: false
-    }
-}, {
-    tableName: 'Zahtjevi',
-    timestamps: false
-});
-
-const Ponuda = sequelize.define('Ponuda', {
-    id: {
-        type: Sequelize.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
-    },
-    tekst: {
-        type: Sequelize.TEXT,
-        allowNull: false
-    },
-    cijenaPonude: {
-        type: Sequelize.INTEGER,
-        allowNull: false
-    },
-    datumPonude: {
-        type: Sequelize.STRING,
-        allowNull: false
-    },
-    odbijenaPonuda: {
-        type: Sequelize.BOOLEAN,
-        allowNull: false,
-        defaultValue: false
-    }
-}, {
-    tableName: 'Ponude',
-    timestamps: false
-});
-
-const Interesovanje = sequelize.define('Interesovanje', {
-    id: {
-        type: Sequelize.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
-    },
-    interesovanje_fk: {
-        type: Sequelize.INTEGER,
-        allowNull: false
-    },
-    tip_interesovanja: {
-        type: Sequelize.STRING(255),
-        allowNull: false,
-        isIn: {
-            args: [
-                ['upit', 'zahtjev', 'ponuda']
-            ],
-            msg: "Treba biti upit, zahtjev ili ponuda"
-        }
-
-    }
-}, {
-    tableName: 'Interesovanja', // Explicitly defining the table name
-    timestamps: false // Assuming no createdAt/updatedAt columns
-})
+const sequelize = require(path.join(__dirname, 'public', 'models', 'baza.js'))
+const Korisnik = require(path.join(__dirname, 'public', 'models', 'korisnik.js'))(sequelize)
+const Nekretnina = require(path.join(__dirname, 'public', 'models', 'nekretnina.js'))(sequelize)
+const Upit = require(path.join(__dirname, 'public', 'models', 'upit.js'))(sequelize)
+const Zahtjev = require(path.join(__dirname, 'public', 'models', 'zahtjev.js'))(sequelize)
+const Ponuda = require(path.join(__dirname, 'public', 'models', 'ponuda.js'))(sequelize)
+const Interesovanje = require(path.join(__dirname, 'public', 'models', 'interesovanje.js'))(sequelize)
 
 Nekretnina.hasMany(Upit, { as:'Upiti' })
 Upit.belongsTo(Nekretnina)
@@ -256,7 +77,7 @@ async function seedDatabase() {
 
     // Insert inquiries (Upiti)
     const inquiries = await Upit.bulkCreate([
-        { tekst: "Da li je cena fiksna?", KorisnikId: 1, NekretninaId: 1 },
+        { tekst: "Da li je cijena fiksna?", KorisnikId: 1, NekretninaId: 1 },
         { tekst: "Koliko su troškovi režija?", KorisnikId: 2, NekretninaId: 1 },
         { tekst: "Sta je ovo?", KorisnikId: 3, NekretninaId: 1 }
     ]);
