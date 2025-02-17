@@ -60,6 +60,7 @@ function displayNotification() {
     notification.style.borderRadius = '5px';
     notification.style.fontSize = '16px';
     notification.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.2)';
+    notification.style.transition = 'opacity 1s';
     document.body.appendChild(notification);
 
 
