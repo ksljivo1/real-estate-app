@@ -3,7 +3,7 @@ const session = require("express-session")
 const path = require('path')
 const fs = require('fs').promises
 const bcrypt = require('bcrypt')
-const { QueryTypes} = require("sequelize")
+const { QueryTypes } = require("sequelize")
 let blokiraniKorisnici = []
 
 const app = express()
@@ -20,6 +20,7 @@ app.use(express.static(__dirname + '/public'))
 app.use(express.json());
 
 const sequelize = require(path.join(__dirname, 'public', 'models', 'baza.js'))
+const {NULL} = require("mysql/lib/protocol/constants/types");
 const Korisnik = require(path.join(__dirname, 'public', 'models', 'korisnik.js'))(sequelize)
 const Nekretnina = require(path.join(__dirname, 'public', 'models', 'nekretnina.js'))(sequelize)
 const Upit = require(path.join(__dirname, 'public', 'models', 'upit.js'))(sequelize)
@@ -27,22 +28,22 @@ const Zahtjev = require(path.join(__dirname, 'public', 'models', 'zahtjev.js'))(
 const Ponuda = require(path.join(__dirname, 'public', 'models', 'ponuda.js'))(sequelize)
 const Interesovanje = require(path.join(__dirname, 'public', 'models', 'interesovanje.js'))(sequelize)
 
-Nekretnina.hasMany(Upit, { as:'Upiti' })
+Nekretnina.hasMany(Upit, { as: 'Upiti' })
 Upit.belongsTo(Nekretnina)
 
-Korisnik.hasMany(Upit, { as:'Upiti' })
+Korisnik.hasMany(Upit, { as: 'Upiti' })
 Upit.belongsTo(Korisnik)
 
-Nekretnina.hasMany(Zahtjev, { as:'Zahtjevi' })
+Nekretnina.hasMany(Zahtjev, { as: 'Zahtjevi' })
 Zahtjev.belongsTo(Nekretnina)
 
-Korisnik.hasMany(Zahtjev, { as:'Zahtjevi' })
+Korisnik.hasMany(Zahtjev, { as: 'Zahtjevi' })
 Zahtjev.belongsTo(Korisnik)
 
-Nekretnina.hasMany(Ponuda, { as:'Ponude' })
+Nekretnina.hasMany(Ponuda, { as: 'Ponude' })
 Ponuda.belongsTo(Nekretnina)
 
-Korisnik.hasMany(Ponuda, { as:'Ponude' })
+Korisnik.hasMany(Ponuda, { as: 'Ponude' })
 Ponuda.belongsTo(Korisnik)
 
 Ponuda.hasMany(Ponuda, { as: 'vezanePonude', foreignKey: 'parentPonuda_id' });
@@ -89,7 +90,7 @@ async function seedDatabase() {
 
     // Insert offers (Ponude)
     const offers = await Ponuda.bulkCreate([
-        { tekst: "Nudim 220000 EUR za stan.", cijenaPonude: 220000, datumPonude: "2024-02-05", odbijenaPonuda: false, KorisnikId: 1, NekretninaId: 1 }
+        { tekst: "Nudim 220000 EUR za stan.", cijenaPonude: 220000, datumPonude: "2024-02-05", odbijenaPonuda: false, KorisnikId: 2, NekretninaId: 1 }
     ]);
 
     // Insert into Interesovanja
@@ -174,12 +175,22 @@ async function saveJsonFile(filename, data) {
     }
 }
 
+function extractInteresovanje(interesovanje) {
+    let interesovanjeMapirano = {}
+    interesovanjeMapirano.tekst = interesovanje.tekst
+    interesovanjeMapirano.datumPonude = interesovanje.datumPonude
+    interesovanjeMapirano.odbijenaPonuda = interesovanje.odbijenaPonuda
+    interesovanjeMapirano.KorisnikId = interesovanje.KorisnikId
+    interesovanjeMapirano.NekretninaId = interesovanje.NekretninaId
+    interesovanjeMapirano.parentPonuda_id = interesovanje.parentPonuda_id
+    return interesovanjeMapirano;
+}
+
 // GET /nekretnina/:id/interesovanja
 // vraća listu svih interesovanja vezanih za nekretninu.
-//     Ako je loginovani korisnik admin, onda vratite sve kolone,
-//     a ako korisnik ili nije loginovan ili je obični korisnik, iz ponuda ne vraćajte atribut cijene
+// Ako je loginovani korisnik admin, onda vratite sve kolone,
+// a ako korisnik ili nije loginovan ili je obični korisnik, iz ponuda ne vraćajte atribut cijene
 // (osim za korisnika koji je napravio tu ponudu ili ako je ponuda vezana za njegovu raniju ponudu).
-
 app.get('/nekretnina/:id/interesovanja', async (req, res) => {
     try {
         const id = req.params.id;
@@ -221,43 +232,37 @@ app.get('/nekretnina/:id/interesovanja', async (req, res) => {
 
         const username = req.session.username
         if(!username) {
-            results = results.map((interesovanje) => {
+            results1 = results.map((interesovanje) => {
                 if (interesovanje.cijenaPonude) {
-                    let interesovanjeMapirano = {}
-                    interesovanjeMapirano.tekst = interesovanje.tekst
-                    interesovanjeMapirano.datumPonude = interesovanje.datumPonude
-                    interesovanjeMapirano.odbijenaPonuda = interesovanje.odbijenaPonuda
-                    interesovanjeMapirano.KorisnikId = interesovanje.KorisnikId
-                    interesovanjeMapirano.NekretninaId = interesovanje.NekretninaId
+                    let interesovanjeMapirano = extractInteresovanje(interesovanje);
                     return interesovanjeMapirano
                 }
                 return interesovanje
             })
-            return res.status(200).json(results);
+            return res.status(200).json(results1);
         }
         const loggedUser = await Korisnik.findOne({ where: { username: username } })
 
         if (loggedUser.admin) {
             return res.status(200).json(results);
         } else {
-            results = results.map((interesovanje) => {
-                if (interesovanje.cijenaPonude && interesovanje.KorisnikId === loggedUser.id) {
-                    let interesovanjeMapirano = {}
-                    interesovanjeMapirano.tekst = interesovanje.tekst
-                    interesovanjeMapirano.datumPonude = interesovanje.datumPonude
-                    interesovanjeMapirano.odbijenaPonuda = interesovanje.odbijenaPonuda
-                    interesovanjeMapirano.KorisnikId = interesovanje.KorisnikId
-                    interesovanjeMapirano.NekretninaId = interesovanje.NekretninaId
+            let results2 = await Promise.all(results.map(async (interesovanje) => {
+                if (interesovanje.cijenaPonude) {
+                    let interesovanjeMapirano = extractInteresovanje(interesovanje);
+                    let parentId = interesovanje.parentPonuda_id
+                    let korisnikNapravioPonuduIliJeVezana = interesovanje.KorisnikId === loggedUser.id
+                    while (parentId !== NULL) {
+                        const parentUpit = await Upit.findOne({ where: { id: parentId } })
+                        if (korisnikNapravioPonuduIliJeVezana) break
+                        korisnikNapravioPonuduIliJeVezana = parentUpit.KorisnikId === loggedUser.id
+                        parentId = parentUpit.parentPonuda_id
+                    }
+                    if (korisnikNapravioPonuduIliJeVezana) interesovanjeMapirano.cijenaPonude = interesovanje.cijenaPonude
                     return interesovanjeMapirano
                 }
                 return interesovanje
-            })
-            return res.status(200).json(results);
-        }
-
-        // If no results are found, return a 404
-        if (!results || results.length === 0) {
-            return res.status(404).json({ message: "No interesovanja found for this nekretnina." });
+            }))
+            return res.status(200).json(results2);
         }
     } catch (error) {
         console.error("Error fetching interesovanja:", error);
@@ -268,10 +273,9 @@ app.get('/nekretnina/:id/interesovanja', async (req, res) => {
 app.post('/signUp', async (req, res) => {
     try {
         const { name, lastName, username, password } = req.body
-        const hashPass = await bcrypt.hash(password, 12)
-        const duplicate = await Korisnik.findOne({ where: { username: username }})
+        const hashPass = await bcrypt.hash(password, 10)
+        const duplicate = await Korisnik.findOne({ where: { username: username } })
         if (duplicate) {
-            console.log("duplikatttt")
             return res.status(409).json({ "message": "duplicate user" })
         }
         await Korisnik.create(

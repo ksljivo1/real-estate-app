@@ -17,8 +17,8 @@ POST http://localhost:3000/login
 Content-Type: application/json
 
 {
-  "username": "username3",
-  "password" : "username3"
+  "username": "user",
+  "password" : "user"
 }
 
 ### get korisnik
@@ -68,3 +68,6 @@ Content-Type: application/json
   "username":"ee",
   "password": "password"
 }
+
+### log out
+POST http://localhost:3000/logout
