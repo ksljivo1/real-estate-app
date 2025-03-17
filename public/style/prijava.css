@@ -34,3 +34,15 @@ li a {
 li a:hover {
     color: #ff9900;
 }
+
+label {
+    padding: 10px;
+}
+
+input {
+    margin: 5px;
+}
+
+button {
+    margin-inline: 10px;
+}

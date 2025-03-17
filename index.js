@@ -3,14 +3,18 @@ const session = require("express-session")
 const path = require('path')
 const fs = require('fs').promises
 const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
 const { QueryTypes } = require("sequelize")
 let blokiraniKorisnici = []
 
+const SECRET_KEY = "secretkey"
 const app = express()
 const PORT = 3000
 
+require('dotenv').config();
+
 app.use(session({
-    secret: 'tajna sifra',
+    secret: process.env.SECRET_KEY,
     resave: true,
     saveUninitialized: true
 }));
@@ -111,6 +115,23 @@ seedDatabase().catch(console.error);
 
 /* ---------------- SERVING HTML -------------------- */
 
+// Middleware to protect routes
+const authenticateJWT = (req, res, next) => {
+    const token = req.header('Authorization')?.split(' ')[1]
+
+    if (!token) {
+        return res.status(401).json({ greska: "Unauthorized" })
+    }
+
+    jwt.verify(token, process.env.SECRET_KEY, (err, user) => {
+        if (err) {
+            return res.status(403).json({ greska: "Invalid token" })
+        }
+        req.user = user
+        next()
+    });
+};
+
 // Async function for serving html files
 async function serveHTMLFile(req, res, fileName) {
     const htmlPath = path.join(__dirname, 'public/html', fileName);
@@ -193,6 +214,7 @@ function extractInteresovanje(interesovanje) {
 // (osim za korisnika koji je napravio tu ponudu ili ako je ponuda vezana za njegovu raniju ponudu).
 app.get('/nekretnina/:id/interesovanja', async (req, res) => {
     try {
+
         const id = req.params.id;
 
         const upiti = await sequelize.query(
@@ -278,8 +300,7 @@ app.post('/signUp', async (req, res) => {
         if (duplicate) {
             return res.status(409).json({ "message": "duplicate user" })
         }
-        await Korisnik.create(
-            {
+        await Korisnik.create( {
                 ime: name,
                 prezime: lastName,
                 username: username,
@@ -306,17 +327,12 @@ app.get('/detalji.html', async (req, res) => {
                 replacements: { id: id },
                 type: sequelize.QueryTypes.SELECT
             }
-        );
-
-
-
-        console.log(upiti)
+        )
 
         if (!nekretnina) {
             return res.status(404).send('Nekretnina not found');
         }
 
-        const filePath = path.join(__dirname, 'public', 'html', 'detalji.html');
         const htmlContent = `
             <!DOCTYPE html>
             <html lang="bs-BA">
@@ -390,8 +406,6 @@ app.post('/login', async (req, res) => {
 
     let prijava = "[" + datum.toDateString() + " - " + datum.toTimeString() +  "]" + " - username: "
     try {
-        // const data = await fs.readFile(path.join(__dirname, 'data', 'korisnici.json'), 'utf-8');
-
         const data = await Korisnik.findAll()
         const korisnici = data.map(x => x.dataValues)
         let found = false;
@@ -402,16 +416,16 @@ app.post('/login', async (req, res) => {
             if (korisnik.username == jsonObj.username) {
                 const isPasswordMatched = await bcrypt.compare(jsonObj.password, korisnik.password);
                 if (isPasswordMatched) {
-                    req.session.username = korisnik.username;
-                    found = true;
-                    break;
+                    req.session.username = korisnik.username
+                    found = true
+                    break
                 }
             }
         }
 
         prijava += jsonObj.username + " - status: "
 
-        found ? prijava += "uspješno" : prijava +="neuspješno"
+        found ? prijava += "uspješno" : prijava += "neuspješno"
 
         await fs.appendFile(path.join(__dirname, 'public', 'resources', 'ostalo', 'prijave.txt'), prijava + "\n")
         let listOfLogs = await fs.readFile(path.join(__dirname, 'public', 'resources', 'ostalo', 'prijave.txt'))
@@ -443,7 +457,9 @@ app.post('/login', async (req, res) => {
             })
         }
         if (found) {
-            res.json({ poruka: 'Uspješna prijava' })
+            const token = jwt.sign({ username: jsonObj.username }, process.env.SECRET_KEY, { expiresIn: '1h' })
+            console.log(token)
+            return res.json({ poruka: 'Uspješna prijava', token })
         }
         else if (blokiran) res.status(429).json({ greska: 'Previse neuspjesnih pokusaja. Pokusajte ponovo za 1 minutu.' })
         else res.json({ poruka: 'Neuspješna prijava' })
@@ -733,7 +749,7 @@ function parseDate(dateString) {
     return new Date(`${year}-${month}-${day}`)
 }
 
-app.get('/nekretnine/top5', async (req, res) => {
+app.get('/nekretnine/top5', authenticateJWT, async (req, res) => {
     try {
         const { lokacija } = req.query
         let nekretnineDataValues = await Nekretnina.findAll()
@@ -800,29 +816,13 @@ app.get('/next/upiti/nekretnina/:id', async (req, res) => {
     try {
         const { id } = req.params
         const { page } = req.query
-        // let nekretnine = await readJsonFile('nekretnine')
-        // let nekretnina = nekretnine.find((nekretnina) => nekretnina.id == id)
-        // const offset = nekretnina.upiti.length - 3 * (parseInt(page) + 1)
-        // if (offset + 3 <= 0) return res.status(404).json([])
-        // nekretnina.upiti = nekretnina.upiti.slice(Math.max(offset, 0), offset + 3)
-        // let statusniKod = nekretnina.upiti.length === 0 ? 404 : 200
-
-
-        // let nekretninaDataValue = await Nekretnina.findOne({ id: id })
-        // const upitiDataValue = await nekretninaDataValue.getUpiti()
-        // console.log(upitiDataValue)
-        // const upiti = upitiDataValue.map((upit) => upit.dataValues)
-
         let upiti = await sequelize.query(
             `SELECT * FROM Upiti WHERE NekretninaId = :id`,
             {
                 replacements: { id: id },
                 type: sequelize.QueryTypes.SELECT
             }
-        );
-
-        // upiti = upiti.map((upit) => upit.dataValues)
-
+        )
         const offset = upiti.length - 3 * (parseInt(page) + 1)
         if (offset + 3 <= 0) return res.status(404).json([])
         let upitiResponse = upiti.slice(Math.max(offset, 0), offset + 3)
@@ -834,7 +834,6 @@ app.get('/next/upiti/nekretnina/:id', async (req, res) => {
     }
 })
 
-// Start server
 app.listen(PORT, () => {
     console.log(`test: Server is running on http://localhost:${PORT}`);
 });
